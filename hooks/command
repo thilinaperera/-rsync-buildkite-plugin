@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euo pipefail
+
+if [[ "${BUILDKITE_PLUGIN_RSYNC_DEBUG:-false}" =~ (true|on|1) ]] ; then
+  echo "--- :hammer: Enabling debug mode"
+  set -x
+fi
+
+PRIVATE_KEY="$(eval echo \"\$$BUILDKITE_PLUGIN_RSYNC_PRIVATE_KEY_ENV_VARIABLE\")"
+SERVER_ADDRESS="$(eval echo \"\$$BUILDKITE_PLUGIN_RSYNC_SERVER_ADDRESS_ENV_VARIABLE\")"
+
+if [ -z $SSH_AGENT_PID ]; then
+   eval `ssh-agent`
+fi
+
+ssh-keyscan -H "${SERVER_ADDRESS}" >> ~/.ssh/known_hosts
+ssh-add -t 20 - <<< "${PRIVATE_KEY}" >/dev/null 2>&1
+echo "... SSH key added"
+
+paths=()
+
+if [[ -n "${BUILDKITE_PLUGIN_RSYNC_COMMANDS:-}" ]] ; then
+  paths+=("BUILDKITE_PLUGIN_RSYNC_COMMANDS")
+fi
+
+while IFS='=' read -r path _ ; do
+  if [[ $path =~ ^(BUILDKITE_PLUGIN_RSYNC_COMMANDS_[0-9]+) ]] ; then
+    paths+=("${!path}")
+  fi
+done < <(env | sort)
+
+workdir=${BUILDKITE_PLUGIN_RSYNC_WORKDIR:-.}
+
+pushd "${workdir}"
+trap popd EXIT
+
+echo "--- rsync-ing "
+
+for path in "${paths[@]}"
+  do
+    ## `eval` to support step-time varibles in the command
+    echo rsync $path
+    eval rsync $path
+  done

@@ -1,0 +1,21 @@
+name: rsync
+description: Use rsync to download files before steps, and upload files afterwards
+author: https://github.com/uw-ipd
+requirements:
+  - rsync
+configuration:
+  properties:
+    upload:
+      type: [ string, array ]
+    download:
+      type: [ string, array ]
+    step:
+      type: string
+    build:
+      type: string
+  oneOf:
+    - required:
+      - upload
+    - required:
+      - download
+  additionalProperties: false
