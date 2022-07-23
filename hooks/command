@@ -1,10 +1,4 @@
 #!/bin/bash
-set -euo pipefail
-
-if [[ "${BUILDKITE_PLUGIN_RSYNC_DEBUG:-false}" =~ (true|on|1) ]] ; then
-  echo "--- :hammer: Enabling debug mode"
-  set -x
-fi
 
 PRIVATE_KEY="$(eval echo \"\$$BUILDKITE_PLUGIN_RSYNC_PRIVATE_KEY_ENV_VARIABLE\")"
 SERVER_ADDRESS="$(eval echo \"\$$BUILDKITE_PLUGIN_RSYNC_SERVER_ADDRESS_ENV_VARIABLE\")"

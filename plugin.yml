@@ -1,6 +1,6 @@
 name: rsync
 description: Use rsync to download files before steps, and upload files afterwards
-author: https://github.com/uw-ipd
+author: https://github.com/thilinaperera
 requirements:
   - rsync
 configuration:
@@ -18,4 +18,3 @@ configuration:
       - upload
     - required:
       - download
-  additionalProperties: false
